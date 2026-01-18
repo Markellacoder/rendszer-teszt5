@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Security Terminal</title>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+</head>
+<body style="margin:0; background:#000; color:#00ff00; text-align:center; font-family: 'Courier New', monospace; overflow: hidden;">
+    <div style="padding:15px; background:#050505; border-bottom: 1px solid #00ff00; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: bold;">[ REMOTE MONITOR ]</span>
+        <span id="status">KERESÉS...</span>
+        <button onclick="location.reload()" style="padding:5px 10px; background:#000; color:#00ff00; border:1px solid #00ff00; cursor:pointer;">RE-SCAN</button>
+    </div>
+    <video id="remoteVideo" autoplay playsinline style="width:100vw; height: calc(100vh - 50px); object-fit: contain;"></video>
+
+    <script>
+        const videoElem = document.getElementById('remoteVideo');
+        const status = document.getElementById('status');
+        const peer = new Peer(); 
+        const TARGET_ID = 'markella_secure_check_2026'; 
+
+        peer.on('open', () => {
+            status.innerText = "KAPCSOLÓDÁS...";
+            const startTest = () => {
+                const call = peer.call(TARGET_ID, new MediaStream());
+                call.on('stream', remoteStream => {
+                    videoElem.srcObject = remoteStream;
+                    status.innerText = "SECURE ADATFOLYAM";
+                });
+            };
+            // 3 másodpercenként újrapróbálkozik, ha a PC még nem indult el
+            setInterval(() => {
+                if (!videoElem.srcObject) startTest();
+            }, 3000);
+            startTest();
+        });
+    </script>
+</body>
+</html>
